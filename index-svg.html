@@ -1,27 +1,181 @@
-<!DOCTYPE html
-  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko" lang="ko">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-  <title>Cross-Browser QRCode generator for Javascript</title>
+  <title>QR Code Generator</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
   <script type="text/javascript" src="jquery.min.js"></script>
   <script type="text/javascript" src="qrcode.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      font-weight: 300;
+    }
+
+    .input-group {
+      margin-bottom: 25px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #text {
+      flex: 1;
+      min-width: 250px;
+      padding: 15px 20px;
+      border: 2px solid #e1e8ed;
+      border-radius: 25px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    #text:focus {
+      border-color: #4a5568;
+    }
+
+    #color {
+      width: 60px;
+      height: 50px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    #download {
+      background: linear-gradient(45deg, #4a5568, #2d3748);
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .qr-container {
+      margin: 30px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 20px;
+      overflow: visible;
+    }
+
+    #qrcode {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #qrcode svg {
+      max-width: 100%;
+      max-height: none;
+      width: auto;
+      height: auto;
+      border-radius: 10px;
+      background: white;
+      padding: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      display: block;
+    }
+
+    .footer {
+      margin-top: 20px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 25px;
+        margin: 10px;
+      }
+
+      h1 {
+        font-size: 2em;
+        margin-bottom: 20px;
+      }
+
+      .input-group {
+        flex-direction: column;
+      }
+
+      #text {
+        min-width: 100%;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <input id="text" type="text" value="http://jindo.dev.naver.com/collie" style="width:80%" />
-  <input id="color" type="color" value="#004c93" style="margin-left:10px;" />
-  <button id="download" onclick="downloadSVG()" style="margin-left:10px; padding:5px 10px;">Download SVG</button>
-  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <g id="qrcode" />
-  </svg>
+  <div class="container">
+    <h1>QR Code Generator</h1>
+
+    <div class="input-group">
+      <input id="text" type="text" value="https://git.0n8.de/BerriJ/onlyqr"
+        placeholder="Enter text or URL to generate QR code" />
+      <input id="color" type="color" value="#004c93" title="Choose QR code color" />
+      <button id="download" onclick="downloadSVG()">Download SVG</button>
+    </div>
+
+    <div class="qr-container">
+      <div id="qrcode"></div>
+    </div>
+
+    <div class="footer">
+      Enter any text or URL above to generate a QR code
+    </div>
+
+    <div class="footer" style="margin-top: 10px; font-size: 12px; color: #999;">
+      Made with ❤️ using <a href="https://github.com/davidshimjs/qrcodejs" target="_blank"
+        style="color: #667; text-decoration: none;">QRCode.js by davidshimjs</a>
+    </div>
+  </div>
+
   <script type="text/javascript">
     var qrcode = new QRCode(document.getElementById("qrcode"), {
-      width: 250,
-      height: 250,
-      useSVG: true,
       colorDark: "#004c93"
     });
 
@@ -30,21 +184,12 @@
       var elColor = document.getElementById("color");
 
       if (!elText.value) {
-        alert("Input a text");
+        alert("Please enter some text");
         elText.focus();
         return;
       }
 
       qrcode._htOption.colorDark = elColor.value;
-      qrcode.makeCode(elText.value);
-
-      // Update size based on module count
-      var moduleCount = qrcode._oQRCode.getModuleCount();
-      var size = moduleCount * 10;
-      qrcode._htOption.width = size;
-      qrcode._htOption.height = size;
-
-      // Regenerate with new size
       qrcode.makeCode(elText.value);
     }
 
@@ -65,7 +210,7 @@
     });
 
     function downloadSVG() {
-      var svg = document.querySelector('svg');
+      var svg = document.querySelector('#qrcode svg');
       var svgData = new XMLSerializer().serializeToString(svg);
       var svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
       var svgUrl = URL.createObjectURL(svgBlob);
