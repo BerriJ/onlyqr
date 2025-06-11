@@ -154,8 +154,7 @@
     <h1>QR Code Generator</h1>
 
     <div class="input-group">
-      <input id="text" type="text" value="https://git.0n8.de/BerriJ/onlyqr"
-        placeholder="Enter text or URL to generate QR code" />
+      <input id="text" type="text" value="" placeholder="Enter text or URL to generate QR code" autofocus />
       <input id="color" type="color" value="#004c93" title="Choose QR code color" />
       <button id="download" onclick="downloadSVG()">Download SVG</button>
     </div>
@@ -169,7 +168,8 @@
     </div>
 
     <div class="footer" style="margin-top: 10px; font-size: 12px; color: #999;">
-      Made with ❤️ using <a href="https://github.com/davidshimjs/qrcodejs" target="_blank"
+      Made by <a href="https://github.com/BerriJ" target="_blank" style="color: #667; text-decoration: none;">BerriJ</a>
+      with ❤️ using <a href="https://github.com/davidshimjs/qrcodejs" target="_blank"
         style="color: #667; text-decoration: none;">QRCode.js by davidshimjs</a>
     </div>
   </div>
@@ -179,23 +179,33 @@
       colorDark: "#004c93"
     });
 
+    var debounceTimer;
+
     function makeCode() {
       var elText = document.getElementById("text");
       var elColor = document.getElementById("color");
 
-      if (!elText.value) {
-        alert("Please enter some text");
-        elText.focus();
-        return;
-      }
+      var text = elText.value || "https://git.0n8.de/BerriJ/onlyqr";
 
       qrcode._htOption.colorDark = elColor.value;
-      qrcode.makeCode(elText.value);
+      qrcode.makeCode(text);
     }
 
+    function debouncedMakeCode() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(makeCode, 20);
+    }
+
+    // Generate initial QR code with default URL since input is empty
     makeCode();
 
+    // Focus the input field after page loads
+    document.getElementById("text").focus();
+
     $("#text").
+      on("input", function () {
+        debouncedMakeCode();
+      }).
       on("blur", function () {
         makeCode();
       }).
