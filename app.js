@@ -9,6 +9,97 @@
 
   var debounceTimer;
 
+  function optimizeSVG(svg) {
+    // Parse the existing SVG to extract the QR data
+    const uses = svg.querySelectorAll('use');
+    const qrData = [];
+    let maxX = 0, maxY = 0;
+    
+    // Extract positions from use elements
+    uses.forEach(use => {
+      const x = parseInt(use.getAttribute('x') || '0');
+      const y = parseInt(use.getAttribute('y') || '0');
+      if (!qrData[y]) qrData[y] = [];
+      qrData[y][x] = true;
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    });
+    
+    // Get the color from the original template
+    const template = svg.querySelector('#template, rect[id]');
+    const color = template ? template.getAttribute('fill') || '#000' : '#000';
+    
+    // Create optimized SVG
+    const optimizedSVG = createOptimizedSVG(qrData, maxX + 1, maxY + 1, color);
+    
+    // Replace the old SVG with the optimized one
+    svg.parentNode.replaceChild(optimizedSVG, svg);
+    
+    return optimizedSVG;
+  }
+
+  function createOptimizedSVG(qrData, width, height, color) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    svg.setAttribute('width', width * 10);
+    svg.setAttribute('height', height * 10);
+    
+    // Create defs section with reusable cell (no fill - will inherit)
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const cellTemplate = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    cellTemplate.setAttribute('id', 'cell');
+    cellTemplate.setAttribute('width', '1');
+    cellTemplate.setAttribute('height', '1');
+    defs.appendChild(cellTemplate);
+    svg.appendChild(defs);
+    
+    // Create main group with fill color
+    const mainGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    mainGroup.setAttribute('fill', color);
+    svg.appendChild(mainGroup);
+    
+    // Create optimized structure
+    for (let y = 0; y < height; y++) {
+      if (!qrData[y]) continue;
+      
+      // Find consecutive cells and group them
+      let x = 0;
+      while (x < width) {
+        if (qrData[y][x]) {
+          // Count consecutive cells
+          let consecutiveCount = 1;
+          while (x + consecutiveCount < width && qrData[y][x + consecutiveCount]) {
+            consecutiveCount++;
+          }
+          
+          if (consecutiveCount > 1) {
+            // Use a single rect for multiple consecutive cells (inherits fill from group)
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', x);
+            rect.setAttribute('y', y);
+            rect.setAttribute('width', consecutiveCount);
+            rect.setAttribute('height', '1');
+            mainGroup.appendChild(rect);
+          } else {
+            // Use individual use elements for single cells (inherits fill from group)
+            const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+            use.setAttribute('href', '#cell');
+            use.setAttribute('x', x);
+            use.setAttribute('y', y);
+            mainGroup.appendChild(use);
+          }
+          
+          x += consecutiveCount;
+        } else {
+          x++;
+        }
+      }
+    }
+    
+    return svg;
+  }
+
   function makeCode() {
     var elText = document.getElementById("text");
     var elColor = document.getElementById("color");
@@ -16,6 +107,14 @@
 
     qrcode._htOption.colorDark = elColor.value;
     qrcode.makeCode(text);
+    
+    // Wait for the QR code to be generated, then optimize it
+    setTimeout(() => {
+      const svg = document.querySelector('#qrcode svg');
+      if (svg) {
+        optimizeSVG(svg);
+      }
+    }, 10);
   }
 
   function debouncedMakeCode() {
