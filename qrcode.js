@@ -193,11 +193,11 @@ var QRCode;
 				return el;
 			}
 
-			var svg = makeSVG("svg" , {'viewBox': '0 0 ' + String(nCount) + " " + String(nCount), 'width': String(10 * nCount), 'height': String(10 * nCount), 'fill': _htOption.colorLight});
+      var svg = makeSVG("svg", {
+        'viewBox': '0 0 ' + String(nCount) + " " + String(nCount), 'width': String(10 * nCount), 'height': String(10 * nCount)
+      });
 			svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
 			_el.appendChild(svg);
-
-			svg.appendChild(makeSVG("rect", {"fill": _htOption.colorLight, "width": "100%", "height": "100%"}));
 			svg.appendChild(makeSVG("rect", {"fill": _htOption.colorDark, "width": "1", "height": "1", "id": "template"}));
 
 			for (var row = 0; row < nCount; row++) {
@@ -294,7 +294,6 @@ var QRCode;
 	 * @param {Number} [vOption.width=256]
 	 * @param {Number} [vOption.height=256]
 	 * @param {String} [vOption.colorDark="#000000"]
-	 * @param {String} [vOption.colorLight="#ffffff"]
 	 * @param {QRCode.CorrectLevel} [vOption.correctLevel=QRCode.CorrectLevel.H] [L|M|Q|H] 
 	 */
 	QRCode = function (el, vOption) {
@@ -303,7 +302,6 @@ var QRCode;
 			height : 256,
 			typeNumber : 4,
 			colorDark : "#000000",
-			colorLight : "rgba(0,0,0,0)",
 			correctLevel : QRErrorCorrectLevel.M
 		};
 		
